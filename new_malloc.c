@@ -25,7 +25,7 @@ void* new_malloc(size_t size) {
     void* mem_block;
     pthread_mutex_lock(&malloc_access_lock);
     header* header_inst = get_free_block(size);
-    if (header_inst) {
+    if (!header_inst) {
         header_inst->header_data.free = false;
 	pthread_mutex_unlock(&malloc_access_lock);
 	return (void*)(header_inst+1);
@@ -51,3 +51,25 @@ void* new_malloc(size_t size) {
     pthread_mutex_unlock(&malloc_access_lock);
     return (void*)(header_inst+1);
 }
+
+header* get_free_block(size_t size) {
+    header* curr = head;
+    header* max = NULL;
+    while (curr) {
+        if (curr->header_data.free && curr->header_data.size >= size && (!max || curr->header_data.size >= max->header_data.size)) {
+            max = curr;
+	}
+	curr = curr->header_data->next;
+    }
+    return max;
+}
+
+
+
+
+
+
+
+
+
+
